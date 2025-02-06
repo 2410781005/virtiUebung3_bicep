@@ -9,6 +9,10 @@ param vmNamen array = [
   'prodAlmaVM03'
 ]
 
+/*
+Definition der Namen der VM's und indirekt auch die Anzahl der VM's
+*/
+
 resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' = {
   name: 'prod-alma-vnet'
   location: location
@@ -29,6 +33,10 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' = {
   }
 }
 
+/*
+Erstellung von IP-Adresse für alle VM's in der VmNamen liste. Mittels for werden, einfach und übersichtlich, mehrere in einem Deployment erstellt
+*/
+
 resource publicIPs 'Microsoft.Network/publicIPAddresses@2024-05-01' = [for vm in vmNamen: {
   name: '${vm}-publicIP'
   location: location
@@ -36,6 +44,10 @@ resource publicIPs 'Microsoft.Network/publicIPAddresses@2024-05-01' = [for vm in
     publicIPAllocationMethod: 'Dynamic'
   }
 }]
+
+/*
+Erstellung von dazugehörigen NIC's mit zuweiseung der public IP's
+*/
 
 resource nics 'Microsoft.Network/networkInterfaces@2024-05-01' = [for (vm, i) in vmNamen: {
   name: '${vm}-nic'
@@ -57,6 +69,10 @@ resource nics 'Microsoft.Network/networkInterfaces@2024-05-01' = [for (vm, i) in
   }
 }]
 
+/*
+Endgültige Erstellung der VM's mit den definierten VM Namen, Benutzername, SSH-Key, NIC's und IP's
+Zusätzlich wird noch ein benötigtes Storage mit dem Image "AlmaLinux" erstellt und der VM zugewiesen
+*/
 
 resource vms 'Microsoft.Compute/virtualMachines@2024-07-01' = [for (vm, i) in vmNamen: {
   name: vm
